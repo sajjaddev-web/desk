@@ -19,7 +19,7 @@ export const authAppMiddleware = async (c: Context, next: Next) => {
       return c.json({ error: true, message: "Token missing" }, 401);
     }
 
-    const decoded: any = verify(token, secretKey);
+    const decoded: any = await verify(token, secretKey);
     if (!decoded || !decoded.id) {
       return c.json({ error: true, message: "Invalid token" }, 401);
     }
@@ -32,7 +32,7 @@ export const authAppMiddleware = async (c: Context, next: Next) => {
       );
     }
 
-    c.set("user", user);
+    c.user = user;
 
     await next();
   } catch (error) {

@@ -1,21 +1,26 @@
-export type AppError = {
+type AppError = {
   errorMessage: string;
 };
 
-export type AppSuccess = {
+type AppSuccess = {
   successMessage: string;
-
   token: string;
   app: any; // Consider using a more specific type if possible
 };
 
-export interface IAppRegisterResult {
+export interface IAppRegisterAndLoginResult {
   error: boolean;
   status: number;
   data: AppError | AppSuccess;
 }
 
 export interface IAppActivationResult {
+  error: boolean;
+  message: string;
+  status: number;
+}
+
+export interface IAppDeleteResult {
   error: boolean;
   message: string;
   status: number;
