@@ -5,11 +5,18 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.12.2",
+    "@hono/zod-validator": "^0.2.2",
     "@prisma/client": "5.19.0",
-    "hono": "^4.5.9"
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "hono": "^4.5.9",
+    "nodemailer": "^6.9.14",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.11.17",
+    "@types/nodemailer": "^6.4.15",
     "prisma": "^5.19.0",
     "tsx": "^4.7.1"
   }
