@@ -1,9 +1,16 @@
-import { sign } from "hono/jwt";
+import { sign, verify } from "hono/jwt";
 import { IRegisterAppForm } from "../../interfaces/form/appForms";
-import { IAppRegisterResult } from "../../interfaces/result/appResult";
+import {
+  IAppActivationResult,
+  IAppRegisterResult,
+} from "../../interfaces/result/appResult";
 import { db } from "../../utils/db";
 import * as bcrypt from "bcrypt";
 import { sendActiveAppEmail } from "../../utils/email/activeApp";
+
+// Generate tokens
+const secretKey = process.env.APP_SECRET_KEY || "my-secret";
+const activationKey = process.env.APP_TOKEN_Activation || "active-account";
 
 export const registerApp = async (
   form: IRegisterAppForm
@@ -34,10 +41,6 @@ export const registerApp = async (
         password: hashedPassword,
       },
     });
-
-    // Generate tokens
-    const secretKey = process.env.APP_SECRET_KEY || "my-secret";
-    const activationKey = process.env.APP_TOKEN_Activation || "active-account";
 
     const token = await sign(
       { id: app.id, name: app.name, email: app.email },
@@ -70,5 +73,44 @@ export const registerApp = async (
       status: 500,
       data: { errorMessage: "Service Error" },
     };
+  }
+};
+
+export const activationApp = async (
+  token: string
+): Promise<IAppActivationResult> => {
+  try {
+    const decoded = await verify(token, activationKey || "active-account");
+
+    if (!decoded || typeof decoded.activationId !== "number") {
+      return { error: true, message: "invalid token", status: 401 };
+    }
+
+    const app = await db.app.findUnique({
+      where: { id: decoded.activationId },
+    });
+
+    if (app?.verify) {
+      return {
+        error: true,
+        message: "Application already activated",
+        status: 400,
+      };
+    }
+
+    // Update user status to active
+    await db.app.update({
+      where: { id: decoded.activationId },
+      data: { verify: true },
+    });
+
+    return {
+      error: false,
+      message: "Application activated successfully",
+      status: 201,
+    };
+  } catch (error) {
+    console.error("Activation error:", error);
+    return { error: true, message: "Server Error", status: 500 };
   }
 };

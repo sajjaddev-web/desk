@@ -10,3 +10,7 @@ export const AppSchema = z.object({
     .string()
     .regex(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,128}$/),
 });
+
+export const activationSchema = z.object({
+  token: z.string(),
+});

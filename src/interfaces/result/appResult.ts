@@ -14,3 +14,9 @@ export interface IAppRegisterResult {
   status: number;
   data: AppError | AppSuccess;
 }
+
+export interface IAppActivationResult {
+  error: boolean;
+  message: string;
+  status: number;
+}

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { AppSchema } from "../schemas/appSchema";
-import { registerApp } from "../services/appService";
+import { activationSchema, AppSchema } from "../schemas/appSchema";
+import { activationApp, registerApp } from "../services/appService";
 
 const appRouter = new Hono();
 
@@ -20,5 +20,24 @@ appRouter.post("/register", zValidator("json", AppSchema), async (c) => {
     );
   }
 });
+
+// Activate user account
+appRouter.get(
+  "/activation",
+  zValidator("query", activationSchema),
+  async (c) => {
+    const validated = c.req.valid("query");
+    try {
+      const result = await activationApp(validated.token);
+      return c.json(
+        { error: result.error, message: result.message },
+        { status: result.status }
+      );
+    } catch (error) {
+      console.error("Activation error:", error);
+      return c.json({ error: true, message: "Internal error" }, 500);
+    }
+  }
+);
 
 export default appRouter;
