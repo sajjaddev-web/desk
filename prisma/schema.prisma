@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model App {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(255)
+  name      String   @unique @db.VarChar(100)
+  password  String   @db.VarChar(128)
+  verify    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+}
+
+model User {
+  id         Int            @id @default(autoincrement())
+  appId      Int
+  app        App            @relation(fields: [appId], references: [id])
+  username   String         @unique @db.VarChar(50)
+  phone      String         @unique @db.VarChar(15)
+  verify     Boolean        @default(false)
+  verifyCode String?        @db.VarChar(10)
+  password   String         @db.VarChar(128)
+  notebooks  Notebook[]     @relation("UserNotebooks")
+  contacts   Notebook[]     @relation("NotebookContacts")
+  chatRooms  UserChatRoom[]
+  messages   Message[]
+  ChatRoom   ChatRoom[]
+}
+
+model Notebook {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  user      User       @relation("UserNotebooks", fields: [userId], references: [id])
+  contacts  User[]     @relation("NotebookContacts")
+  chatRooms ChatRoom[]
+}
+
+model ChatRoom {
+  id         Int            @id @default(autoincrement())
+  notebookId Int
+  notebook   Notebook       @relation(fields: [notebookId], references: [id])
+  ownerId    Int
+  owner      User           @relation(fields: [ownerId], references: [id])
+  users      UserChatRoom[]
+  messages   Message[]
+}
+
+model UserChatRoom {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+  chatRoomId Int
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  chatRoomId Int
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  senderId   Int
+  sender     User     @relation(fields: [senderId], references: [id])
+  content    String   @db.Text
+  timestamp  DateTime @default(now())
+}
